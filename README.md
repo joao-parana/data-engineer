@@ -66,4 +66,15 @@ Esta chamada acima carrega também a dependência definida como mostrado abaixo.
 <version>2.1.0</version>
 ```
 
+As dependências são resolvidas pelo **Apache Yvy** e os JARS ficam repectivamente em `$HOME/.ivy2/cache` e `$HOME/.ivy2/jars`.
+
+Os JARs podem ficar também em `$HOME/.m2/repository` quando tiver o Maven instalado na máquina
+
+Você pode verificar usando:
+
+```
+find $HOME/.ivy2/cache
+find $HOME/.ivy2/jars
+find $HOME/.m2/repository -name "spark-hive_*.jar"
+```
 
