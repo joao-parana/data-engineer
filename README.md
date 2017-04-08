@@ -50,4 +50,20 @@ my-worker-01.acme.com: starting org.apache.spark.deploy.worker.Worker, logging t
 
 Este arquivo de LOG especificado fica na máquina `my-worker-01` e é um dos Slaves.
 
+## Usando o Spark
+
+Uma sessão do Spark em Scala pode ser criada assim:
+
+```bash
+spark-shell --master local[4] --packages "org.apache.spark:spark-hive_2.11:2.1.0"
+```
+
+Esta chamada acima carrega também a dependência definida como mostrado abaixo.
+
+```xml
+<groupId>org.apache.spark</groupId>
+<artifactId>spark-hive_2.11</artifactId>
+<version>2.1.0</version>
+```
+
 
