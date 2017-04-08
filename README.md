@@ -55,26 +55,33 @@ Este arquivo de LOG especificado fica na máquina `my-worker-01` e é um dos Sla
 Uma sessão do Spark em Scala pode ser criada assim:
 
 ```bash
-spark-shell --master local[4] --packages "org.apache.spark:spark-hive_2.11:2.1.0"
+spark-shell --master local[4] --packages "br.cefet-rj.eic:wff:0.5.0"
 ```
 
 Esta chamada acima carrega também a dependência definida como mostrado abaixo.
 
 ```xml
-<groupId>org.apache.spark</groupId>
-<artifactId>spark-hive_2.11</artifactId>
-<version>2.1.0</version>
+<groupId>br.cefet-rj.eic</groupId>
+<artifactId>wff</artifactId>
+<version>0.5.0</version>
 ```
 
-As dependências são resolvidas pelo **Apache Yvy** e os JARS ficam repectivamente em `$HOME/.ivy2/cache` e `$HOME/.ivy2/jars`.
+As dependências são resolvidas pelo **Apache Ivy**. Os artefatos de meta informação e os JARS ficam repectivamente em `$HOME/.ivy2/cache` e `$HOME/.ivy2/jars`.
 
-Os JARs podem ficar também em `$HOME/.m2/repository` quando tiver o Maven instalado na máquina
+Os JARs podem ficar também em `$HOME/.m2/repository` quando tiver o Maven instalado na máquina e o Ivy copia para a área citada acima.
 
 Você pode verificar usando:
 
 ```
 find $HOME/.ivy2/cache
 find $HOME/.ivy2/jars
-find $HOME/.m2/repository -name "spark-hive_*.jar"
+find $HOME/.m2/repository -name "wff*.jar"
 ```
+
+Outro exemplo:
+
+```bash
+
+```
+
 
