@@ -52,10 +52,17 @@ Este arquivo de LOG especificado fica na máquina `my-worker-01` e é um dos Sla
 
 ## Usando o Spark
 
+O diretório `/tmp/spark-events` deve existir
+
+```bash
+mkdir /tmp/spark-events
+```
+
+
 Uma sessão do Spark em Scala pode ser criada assim:
 
 ```bash
-spark-shell --master local[4] --packages "br.cefet-rj.eic:wff:0.5.0"
+spark-shell --master spark://meu-master.acme.com:7077 --packages "br.cefet-rj.eic:wff:0.5.0"  --num-executors 2
 ```
 
 Esta chamada acima carrega também a dependência definida como mostrado abaixo.
@@ -77,6 +84,26 @@ find $HOME/.ivy2/cache
 find $HOME/.ivy2/jars
 find $HOME/.m2/repository -name "wff*.jar"
 ```
+
+### Parâmetros úteis para o spark-shell
+
+Veja esta seção da documentação: [http://spark.apache.org/docs/2.1.0/configuration.html#dynamically-loading-spark-properties](http://spark.apache.org/docs/2.1.0/configuration.html#dynamically-loading-spark-properties)
+
+`spark-submit`  lê as configurações no arquivo `conf/spark-defaults.conf` que consiste de chave/valor separados por brancos e cada linha é uma propriedade. Por exemplo, no meu caso:
+
+```bash
+cat ~/spark/conf/spark-defaults.conf
+# substitua meu-master.acme.com pelo endereço do seu servidor
+spark.master                     spark://meu-master.acme.com:7077
+spark.eventLog.enabled           true
+# spark.eventLog.dir             hdfs://namenode:8021/directory
+spark.serializer                 org.apache.spark.serializer.KryoSerializer
+spark.driver.memory              2g
+# spark.executor.extraJavaOptions  -XX:+PrintGCDetails -Dkey=value -Dnumbers="one two three"
+```
+
+Linhas com `#` no início são comentários
+
 
 Outro exemplo:
 
