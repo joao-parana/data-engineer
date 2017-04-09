@@ -29,3 +29,40 @@ echo "export PATH=.local/bin:\$PATH" >> ~/.profile
 echo "#" >> ~/.profile
 export PATH=.local/bin:$PATH
 ```
+
+## Instalando SciPy e matplotlib
+
+
+```
+# Pode ser necessário instalar os pacotes no Linux
+# sudo apt-get install libblas-dev liblapack-dev libatlas-base-dev gfortran
+pip install scipy
+python -m pip install -U pip setuptools
+python -m pip install matplotlib
+```
+
+## Testando SciPy
+
+```
+import numpy
+scores=numpy.array([114, 100, 104, 89, 102, 91, 114, 114, 103, 105, 108, 130, 120, 132, 111, 128, 118, 119, 86, 72, 111, 103, 74, 112, 107, 103, 98, 96, 112, 112, 93])
+from scipy import stats
+result=scipy.stats.bayes_mvs(scores)
+help(scipy.stats.bayes_mvs)
+import scipy
+help(scipy.stats.bayes_mvs)
+numpy.info('random')
+help(scipy.stats)
+help(scipy.stats.kurtosis)
+
+import matplotlib as mpl
+mpl.use('Agg')
+import matplotlib.pyplot as plt
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.plot(range(10))
+fig.savefig('temp.png')
+
+```
+
