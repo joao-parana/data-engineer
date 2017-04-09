@@ -32,6 +32,11 @@
             <version>2.1.0</version>
         </dependency>
         <dependency>
+            <groupId>br.cefet-rj.eic</groupId>
+            <artifactId>wff</artifactId>
+            <version>0.5.0</version>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.11</version>
