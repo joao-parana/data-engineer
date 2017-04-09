@@ -107,22 +107,30 @@ Linhas com `#` no início são comentários
 
 ## Executando Tarefas no Cluster
 
+Invocamos o Spark Shell com as classes do Framework
+
 ```bash
 alias wff='spark-shell --packages "br.cefet-rj.eic:wff:0.5.0"'
 wff
 ```
 
+Carregamos o programa e em seguida saimos 
 
 ```scala
 :load BasicDataFrame.sc
 :quit
 ```
 
+É muito importante copiar os arquivos para o diretório correto em **todas as máquinas do Cluster**. 
+Só assim os **Workers** do Spark podem acessar os arquivos. Caso ele não ache ocorrerá o erro
+`FileNotFoundException: File file:/desenv/DATA/people.json does not exist`
+
+
+O programa de exemplo aparece abaixo
 
 ```
 cat BasicDataFrame.sc
 ```
-
 
 ```scala
 import org.apache.spark.sql._
@@ -177,6 +185,8 @@ def runBasicDataFrameExample(spark: SparkSession): Unit = {
 }
 runBasicDataFrameExample(spark)
 ```
+
+
 
 
 ```bash
