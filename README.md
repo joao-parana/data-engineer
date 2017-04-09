@@ -105,10 +105,91 @@ spark.driver.memory              2g
 Linhas com `#` no início são comentários
 
 
-Outro exemplo:
+## Executando Tarefas no Cluster
 
 ```bash
+alias wff='spark-shell --packages "br.cefet-rj.eic:wff:0.5.0"'
+wff
+```
+
+
+```scala
+:load BasicDataFrame.sc
+:quit
+```
+
 
 ```
+cat BasicDataFrame.sc
+```
+
+
+```scala
+import org.apache.spark.sql._
+import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
+import org.apache.spark.sql.types._
+
+case class Person(name: String, age: Long)
+
+// This import is needed to use the $-notation
+import spark.implicits._
+
+def runBasicDataFrameExample(spark: SparkSession): Unit = {
+  // $example on:create_df$
+  val df = spark.read.json("/desenv/DATA/people.json")
+  // cat   /desenv/DATA/people.json
+  // {"name":"Michael"}
+  // {"name":"Andy", "age":30}
+  // {"name":"Justin", "age":19}
+  // Displays the content of the DataFrame to stdout
+  df.show()
+
+  // import spark.implicits._
+  // Print the schema in a tree format
+  df.printSchema()
+
+  // Select only the "name" column
+  df.select("name").show()
+
+  // Select everybody, but increment the age by 1
+  df.select($"name", $"age" + 1).show()
+
+  // Select people older than 21
+  df.filter($"age" > 21).show()
+
+  // Count people by age
+  df.groupBy("age").count().show()
+
+  // Register the DataFrame as a SQL temporary view
+  df.createOrReplaceTempView("people")
+
+  val sqlDF = spark.sql("SELECT * FROM people")
+  sqlDF.show()
+
+  // Register the DataFrame as a global temporary view
+  df.createGlobalTempView("people")
+
+  // Global temporary view is tied to a system preserved database `global_temp`
+  spark.sql("SELECT * FROM global_temp.people").show()
+
+  // Global temporary view is cross-session
+  spark.newSession().sql("SELECT * FROM global_temp.people").show()
+}
+runBasicDataFrameExample(spark)
+```
+
+
+```bash
+```
+
+
+```bash
+```
+
+
+```bash
+```
+
+
 
 
