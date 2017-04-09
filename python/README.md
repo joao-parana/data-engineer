@@ -64,5 +64,10 @@ ax = fig.add_subplot(111)
 ax.plot(range(10))
 fig.savefig('temp.png')
 
+numpy.linspace(0, 1, 500)
+x = numpy.linspace(0, 1, 500)
+y = numpy.sin(4 * numpy.pi * x) * numpy.exp(-5 * x)
+fig, ax = plt.subplots()
+fig.savefig('sin.png')
 ```
 
