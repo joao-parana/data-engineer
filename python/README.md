@@ -63,11 +63,19 @@ fig = plt.figure()
 ax = fig.add_subplot(111)
 ax.plot(range(10))
 fig.savefig('temp.png')
+```
 
-numpy.linspace(0, 1, 500)
+![temp](temp.png)
+
+```
 x = numpy.linspace(0, 1, 500)
 y = numpy.sin(4 * numpy.pi * x) * numpy.exp(-5 * x)
 fig, ax = plt.subplots()
+ax.fill(x, y, zorder=10)
+ax.grid(True, zorder=5)
+plt.show()
 fig.savefig('sin.png')
 ```
+
+![sin](sin.png)
 
