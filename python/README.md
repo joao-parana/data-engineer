@@ -30,13 +30,15 @@ echo "#" >> ~/.profile
 export PATH=.local/bin:$PATH
 ```
 
-## Instalando SciPy
+## Instalando SciPy e matplotlib
+
 
 ```
 # Pode ser necessário instalar os pacotes no Linux
 # sudo apt-get install libblas-dev liblapack-dev libatlas-base-dev gfortran
 pip install scipy
-pip install matplotlib
+python -m pip install -U pip setuptools
+python -m pip install matplotlib
 ```
 
 ## Testando SciPy
@@ -52,6 +54,15 @@ help(scipy.stats.bayes_mvs)
 numpy.info('random')
 help(scipy.stats)
 help(scipy.stats.kurtosis)
+
+import matplotlib as mpl
+mpl.use('Agg')
+import matplotlib.pyplot as plt
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.plot(range(10))
+fig.savefig('temp.png')
 
 ```
 
