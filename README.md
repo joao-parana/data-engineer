@@ -186,7 +186,7 @@ def runBasicDataFrameExample(spark: SparkSession): Unit = {
 runBasicDataFrameExample(spark)
 ```
 
-
+Um script Scala para ser carregado no spark-shell pode ser visto em [AllAboutDataFrame.sc](AllAboutDataFrame.sc). Ele é mais completo e inclui o exemplo acima. 
 
 
 ```bash
