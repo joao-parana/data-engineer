@@ -85,6 +85,10 @@ find $HOME/.ivy2/jars
 find $HOME/.m2/repository -name "wff*.jar"
 ```
 
+Um arquivo pom.xml mínimo pode ser visto em [pom.xml](pom.xml)
+
+
+
 ### Parâmetros úteis para o spark-shell
 
 Veja esta seção da documentação: [http://spark.apache.org/docs/2.1.0/configuration.html#dynamically-loading-spark-properties](http://spark.apache.org/docs/2.1.0/configuration.html#dynamically-loading-spark-properties)
