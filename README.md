@@ -85,6 +85,29 @@ ExecStart=/usr/local/bin/disk-space-check.sh
 WantedBy=default.target
 ```
 
+Alteramos os flags dos arquivos:
+
+```bash
+chmod 744 /usr/local/bin/disk-space-check.sh
+chmod 664 /etc/systemd/system/disk-space-check.service
+```
+
+Next, install systemd service unit and enable it so it will be executed at the boot time:
+
+```bash
+systemctl daemon-reload
+systemctl enable disk-space-check.service
+```
+
+
+Para testar antes do reboot use:
+
+```bash
+systemctl start disk-space-check.service
+cat /root/disk_space_report.txt 
+```
+
+That's all folks ! 
 
 
 ## Gerenciando o ciclo de vida via systemd
