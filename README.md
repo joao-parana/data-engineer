@@ -50,6 +50,15 @@ my-worker-01.acme.com: starting org.apache.spark.deploy.worker.Worker, logging t
 
 Este arquivo de LOG especificado fica na máquina `my-worker-01` e é um dos Slaves.
 
+## Iniciando o Spark no restart da máquina via systemd
+
+O link [https://linuxconfig.org/how-to-automatically-execute-shell-script-at-startup-boot-on-systemd-linux](https://linuxconfig.org/how-to-automatically-execute-shell-script-at-startup-boot-on-systemd-linux) mostra como fazer uma configuração simples quando desejamos amenas carregar um script no _start-up_ do Sistema Operacional Linux. 
+
+## Gerenciando o ciclo de vida via systemd
+
+Se desejarmos gerenciar o ciclo de vida completo usando o _systemd_ podemos nos basear no link [https://www.ubuntudoc.com/how-to-create-new-service-with-systemd/](https://www.ubuntudoc.com/how-to-create-new-service-with-systemd/).
+
+
 ## Usando o Spark
 
 O diretório `/tmp/spark-events` deve existir
