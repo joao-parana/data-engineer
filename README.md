@@ -54,7 +54,7 @@ Este arquivo de LOG especificado fica na máquina `my-worker-01` e é um dos Sla
 
 O link [https://linuxconfig.org/how-to-automatically-execute-shell-script-at-startup-boot-on-systemd-linux](https://linuxconfig.org/how-to-automatically-execute-shell-script-at-startup-boot-on-systemd-linux) mostra como fazer uma configuração simples quando desejamos amenas carregar um script no _start-up_ do Sistema Operacional Linux. 
 
-Por exemplo, considere os seguintes arquivos:
+Antes de fazer o procedimento para o Spark vamos testar com um exemplo mais simples. Por exemplo, considere os seguintes arquivos:
 
 ```bash
 sudo cat /usr/local/bin/disk-space-check.sh
@@ -109,7 +109,9 @@ systemctl start disk-space-check.service
 cat /var/disk_space_report.txt 
 ```
 
-Se o cat funcionar, fique tranquilo que após cada reboot ele executará novamente.
+Se o cat funcionar, fique tranquilo que após cada reboot o processo de geração de relatório de uso do disco rígido executará novamente.
+
+Para chamar o Spark é um processo análogo.
 
 That's all folks ! 
 
