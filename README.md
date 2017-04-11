@@ -54,6 +54,39 @@ Este arquivo de LOG especificado fica na máquina `my-worker-01` e é um dos Sla
 
 O link [https://linuxconfig.org/how-to-automatically-execute-shell-script-at-startup-boot-on-systemd-linux](https://linuxconfig.org/how-to-automatically-execute-shell-script-at-startup-boot-on-systemd-linux) mostra como fazer uma configuração simples quando desejamos amenas carregar um script no _start-up_ do Sistema Operacional Linux. 
 
+Por exemplo, considere os seguintes arquivos:
+
+```bash
+sudo cat /usr/local/bin/disk-space-check.sh
+#!/bin/bash
+
+set -e 
+
+date > /var/disk_space_report.txt
+du -sh /tmp/ >> /var/disk_space_report.txt
+du -sh /desenv >> /var/disk_space_report.txt
+du -sh /data >> /var/disk_space_report.txt
+for a in `ls /home`
+do
+  TEMP=`du -sh /home/$a`
+  echo "$TEMP "  >> /var/disk_space_report.txt
+done
+```
+
+```
+sudo cat /etc/systemd/system/disk-space-check.service 
+[Unit]
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/disk-space-check.sh
+
+[Install]
+WantedBy=default.target
+```
+
+
+
 ## Gerenciando o ciclo de vida via systemd
 
 Se desejarmos gerenciar o ciclo de vida completo usando o _systemd_ podemos nos basear no link [https://www.ubuntudoc.com/how-to-create-new-service-with-systemd/](https://www.ubuntudoc.com/how-to-create-new-service-with-systemd/).
