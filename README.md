@@ -98,14 +98,18 @@ Next, install systemd service unit and enable it so it will be executed at the b
 systemctl daemon-reload
 systemctl enable disk-space-check.service
 ```
+O sistema responde com:
 
+> Created symlink from /etc/systemd/system/default.target.wants/disk-space-check.service to /etc/systemd/system/disk-space-check.service.
 
 Para testar antes do reboot use:
 
 ```bash
 systemctl start disk-space-check.service
-cat /root/disk_space_report.txt 
+cat /var/disk_space_report.txt 
 ```
+
+Se o cat funcionar, fique tranquilo que após cada reboot ele executará novamente.
 
 That's all folks ! 
 
