@@ -1,0 +1,6 @@
+#!/bin/bash
+set -e 
+
+# Código incompleto para o Docker no Alpine Linux
+cd /tmp/install/build-R-python-spark
+ls

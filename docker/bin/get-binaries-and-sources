@@ -1,0 +1,10 @@
+#!/bin/bash
+set -e 
+
+echo "Obtendo os binários à partir da Internet"
+curl -o spark-2.1.0-bin-hadoop2.7.tgz http://d3kbcqa49mib13.cloudfront.net/spark-2.1.0-bin-hadoop2.7.tgz
+wget https://github.com/sgerrand/alpine-pkg-R/releases/download/3.3.1-r0/R-3.3.1-r0.apk 
+
+echo "Movendo para o lugar correto"
+mv spark-2.1.0-bin-hadoop2.7.tgz ../build-R-spark/spark
+mv R-3.3.1-r0.apk  ../build-R-spark/R

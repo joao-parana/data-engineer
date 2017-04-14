@@ -1,0 +1,5 @@
+#!/bin/bash
+set -e 
+
+cd /tmp/install/build-R-python-spark
+ls

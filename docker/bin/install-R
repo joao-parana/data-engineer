@@ -1,0 +1,11 @@
+#!/bin/bash
+set -e 
+
+# Código incompleto para o Docker no Alpine Linux
+cd /tmp/install/build-R-python-spark/R
+ls
+tar xvf R-3.3.3.tar.gz
+cd R-3.3.3
+echo "Instalando o R no diretório /usr/local/R"
+./configure --prefix=/usr/local/R --with-readline=no --with-x=no
+make && make install
