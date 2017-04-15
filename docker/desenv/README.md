@@ -1,5 +1,12 @@
 # desenv
 
+## Ambiente Spark
+
+```bash
+spark-shell --master spark://spark-master.local:7077  --packages "br.cefet-rj.eic:wff:0.5.0"
+```
+
+
 ## Pipe in Spark
 
 Pipe operator in Spark, allows developer to process RDD data using external applications. Sometimes in data analysis, we need to use an external library which may not be written using Java/Scala. Ex: Fortran math libraries. In that case, spark’s pipe operator allows us to send the RDD data to the external application.
@@ -14,19 +21,20 @@ Step 1 : Create a RDD
 
 ```scala
 val data = List("hi","hello","how","are","you")
- val dataRDD = sc.makeRDD(data) //sc is SparkContext
+val dataRDD = sc.makeRDD(data) //sc is SparkContext
 ```
 
 Step 2 : Create a shell script
 
-Once we have RDD, then we will pipe it to a shell script. Let’s create a file called echo.sh, then put the following content.
+Once we have RDD, then we will pipe it to a shell script. Let’s create a file called to-upper.sh, then put the following content.
 
 ```bash
 #!/bin/sh
-echo "Running shell script"
 while read LINE; do
-   echo ${LINE}
+   toupper=`echo ${LINE} | awk '{print toupper($0)}'`
+   echo "Worker on $HOSTNAME,$toupper"
 done
+
 ```
 
 This is a simple shell script which reads the input from stdin and output that to stdout. You can do any other shell operation in this shell script.
@@ -36,7 +44,7 @@ Step 3 : Pipe rdd data to shell script
 One we have the shell script, we can pipe the RDD through this script. Make sure that you change the scriptPath variable to match path of your file.
 
 ```scala
-val scriptPath = "/home/hadoop/echo.sh"
+val scriptPath = "/desenv/DATA/to-upper.sh"
 val pipeRDD = dataRDD.pipe(scriptPath)
 pipeRDD.collect()
 ```
