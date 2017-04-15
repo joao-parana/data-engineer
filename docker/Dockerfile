@@ -1,4 +1,5 @@
 FROM anapsix/alpine-java:8_jdk
+
 #
 # TODO: Avaliar a imagem frolvlad/alpine-oraclejdk8 que parece ser melhor
 # pois trata o problema de java.net.InetAddress que não resolvia endereço IP
@@ -6,10 +7,12 @@ FROM anapsix/alpine-java:8_jdk
 
 #
 # Esta imagem da qual herdo as funcionalidades inclui Java JDK 8 da Oracle,
-# e glibc-2.21. Sobre ela instalo o Bash, o Git e o cliente MySQL
+# e glibc-2.21. Sobre ela instalo o Bash, o Git, o Maven, o Python, o R, 
+# o Spark e o cliente MySQL
 #
 # https://github.com/anapsix/docker-alpine-java/tree/master/8/jdk
 #
+
 MAINTAINER João Antonio Ferreira "joao.parana@gmail.com"
 
 ENV REFRESHED_AT 2017-04-14
@@ -25,8 +28,6 @@ RUN apk upgrade --update && \
 ENV SPARK_HOME  /usr/local/spark
 
 WORKDIR /desenv/DATA
-
-RUN mkdir -p $SPARK_HOME/bin
 
 # Para compilar fontes Java com encoding UTF-8
 ENV JAVA_TOOL_OPTIONS "-Dfile.encoding=UTF8"
@@ -77,13 +78,45 @@ RUN apk add python && \
 
 RUN cd /tmp/install/build-R-spark/spark && ls && \
     tar xzf spark-2.1.0-bin-hadoop2.7.tgz && \
+    echo "••• `date` - ls -la /usr/local/" && \
     ls -la /usr/local/ && \
-    mv spark-2.1.0-bin-hadoop2.7 spark && \
-    mv spark /usr/local/ &&\
-    mkdir -p /usr/local/spark/tmp
+    mv spark-2.1.0-bin-hadoop2.7 /usr/local/spark &&\
+    mkdir -p /usr/local/spark/tmp && \
+    echo "••• `date` - ls -la /usr/local/spark" && \
+    ls -la /usr/local/spark
 
 ADD conf/spark-defaults.conf /usr/local/spark/conf/
-ADD conf/spark-env.sh /usr/local/spark/conf
+ADD conf/spark-env.sh /usr/local/spark/conf/
+
+ENV MAVEN_VERSION 3.3.9
+ENV MAVEN_HOME /usr/local/mvn
+ENV PATH $MAVEN_HOME/bin:$PATH
+
+# http://archive.apache.org/dist/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
+RUN curl -O http://archive.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz && \
+  tar -zxf apache-maven-$MAVEN_VERSION-bin.tar.gz && \
+  rm apache-maven-$MAVEN_VERSION-bin.tar.gz && \
+  mv apache-maven-$MAVEN_VERSION /usr/local/mvn
+
+ADD maven/pom.xml /desenv/maven/pom.xml
+ADD maven/wff-0.5.0.jar /desenv/maven/wff-0.5.0.jar
+
+RUN cd /desenv/maven && \
+    grep -B 2 -A 2 artifactId pom.xml && \
+    echo "••• `date` - Instalando o WfF localmente" && \
+    mvn -q install:install-file \
+        -Dfile=wff-0.5.0.jar \
+        -DgroupId=br.cefet-rj.eic \
+        -DartifactId=wff \
+        -Dversion=0.5.0 \
+        -Dpackaging=jar && \
+    echo "••• `date` - WfF instalado localmente com sucesso." && \
+    echo "••• `date` - Fazendo o build de projeto simples." && \
+    echo "••• `date` - O Download dos artefatos pode demorar vários minutos, por favor aguarede !" && \
+    mvn -q -Dmaven.test.skip=true clean install && \
+    echo "••• `date` - Terminou o Download dos artefatos do maven !"
+
+ADD conf/slaves /usr/local/spark/conf/
 
 # Spark
 EXPOSE 7077
@@ -91,6 +124,8 @@ EXPOSE 7077
 EXPOSE 8080
 # WEB UI para Slave
 EXPOSE 8081
+
+VOLUME /spark/DATA
 
 CMD ["/bin/bash"]
 
