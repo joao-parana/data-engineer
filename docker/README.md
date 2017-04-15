@@ -54,3 +54,9 @@ Observe que `WFF_CLASSPATH` não foi expandida mantendo ainda o código bash.
 pwd
 ls -lat
 ```
+
+Quando executamos `sbin/start-master.sh` a shel é expandida para:
+
+```
+/usr/local/spark/sbin/spark-daemon.sh start org.apache.spark.deploy.master.Master 1 --host spark-master.local --port 7077 --webui-port 8080
+```
