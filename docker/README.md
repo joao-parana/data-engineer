@@ -135,7 +135,7 @@ wff
 Agora podemos invocar tasks pois o arquivo `spark-defaults.conf` configura,
 entre outras coisas, o  `spark.master` apontando para `spark://spark-master.local:7077`
 
-```
+```bash
 cat /usr/local/spark/conf/spark-defaults.conf
 # conf/spark-defaults.conf
 
@@ -144,6 +144,16 @@ spark.serializer                 org.apache.spark.serializer.KryoSerializer
 spark.driver.memory              2g
 ```
 
+## Monitorando o Master e os Workers
+
+```bash
+open http://localhost:8080
+open http://localhost:8081
+open http://localhost:8082
+open http://localhost:8083
+```
+
+Isso abrirá 4 páginas no Browser.
 
 
 # Anexo I
