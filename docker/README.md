@@ -22,15 +22,18 @@ cd ..
 **Para cada um dos Workers** abre-se uma janela de Terminal independente e executa-se em cada uma delas os comandos:
 
 ```bash
-docker run --rm --name spark-worker1 -h spark-worker1 -p 8081:8081  -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
+docker run --rm --name spark-worker1 -h spark-worker1 -p 8081:8081 \
+           -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
 ```
 
 ```bash
-docker run --rm --name spark-worker2 -h spark-worker2 -p 8082:8081  -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
+docker run --rm --name spark-worker2 -h spark-worker2 -p 8082:8081 \
+           -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
 ```
 
 ```bash
-docker run --rm --name spark-worker3 -h spark-worker3 -p 8083:8081  -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
+docker run --rm --name spark-worker3 -h spark-worker3 -p 8083:8081 \
+           -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
 ```
 
 
@@ -39,7 +42,10 @@ docker run --rm --name spark-worker3 -h spark-worker3 -p 8083:8081  -v $PWD/DATA
 Abre-se uma janela de Terminal e executa-se:
 
 ```bash
-docker run --rm --name spark-master -h spark-master --link spark-worker1 --link spark-worker2  --link spark-worker3 -p 7077:7077 -p 8080:8080 -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
+docker run --rm --name spark-master -h spark-master \
+           --link spark-worker1 --link spark-worker2  --link spark-worker3 \
+           -p 7077:7077 -p 8080:8080 \
+           -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
 ```
 
 ### Listando os Contêineres
