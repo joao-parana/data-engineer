@@ -63,23 +63,9 @@ O comando abaixo mostra todos os contêineres incluindo os que não estão em ex
 docker ps -a
 ```
 
-
-
 ## Iniciando o Cluster
 
-### Iniciando o Master
-
-Na janela de Terminal do Contêiner Master, executa-se:
-
-```bash
-/usr/local/spark/sbin/start-master.sh
-```
-
-ou simplesmente `start-master.sh` pois o path `/usr/local/spark/sbin/` está no `$PATH`
-
-O Spark Master usa o arquivo de configuração de log `org/apache/spark/log4j-defaults.properties` por padrão.
-
-#### Configuração de DNS
+#### Configuração de DNS e Network
 
 No computador Host (macOS, por exemplo), faça:
 
@@ -95,6 +81,11 @@ docker network connect spark spark-master
 docker network connect spark spark-worker1
 docker network connect spark spark-worker2
 docker network connect spark spark-worker3
+# desconectando os contêineres da Network bridge criada pelo comando docker run
+docker network disconnect bridge spark-master
+docker network disconnect bridge spark-worker1
+docker network disconnect bridge spark-worker2
+docker network disconnect bridge spark-worker3
 # inspecionando os contêineres
 docker inspect --format='' spark-master | python -m json.tool | egrep "IPAddress\"|\"Gateway"
 docker inspect --format='' spark-worker1 | python -m json.tool | egrep "IPAddress\"|\"Gateway"
@@ -112,6 +103,20 @@ cat /etc/hosts
 ```
 
 Agora copie os ultimas linhas do arquivo `/etc/hosts` para os outros `/etc/hosts` dos Workers. Pode-se usar o comando `vi` para isso.
+
+
+### Iniciando o Master
+
+Na janela de Terminal do Contêiner Master, executa-se:
+
+```bash
+# Desabilitar a interface de rede 
+/usr/local/spark/sbin/start-master.sh
+```
+
+ou simplesmente `start-master.sh` pois o path `/usr/local/spark/sbin/` está no `$PATH`
+
+O Spark Master usa o arquivo de configuração de log `org/apache/spark/log4j-defaults.properties` por padrão.
 
 
 ### Iniciando o Worker 3, 2 e 1 ...
