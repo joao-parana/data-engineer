@@ -1,4 +1,5 @@
 #! /usr/bin/env Rscript 
+
 remove_out_location<-function(x)
 {
   #latitude m?xima: -22.691005
@@ -159,3 +160,4 @@ print(data)
 #Reading input from STDIN, method 2
 #data <- read.table(file("stdin"), header=F, fill=T, sep="\t")
  
+

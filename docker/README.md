@@ -96,7 +96,7 @@ docker inspect --format='' spark-worker3 | python -m json.tool | egrep "IPAddres
 Para testar podemos usar o `ping` dentro dos contêineres, pingando cada outro.
 Caso não funcione, podemos sempre executar uma alternativa via o Work-around abaixo:
 
-No conteiner spark-master.local faça:
+No conteiner spark-master faça:
 
 ```bash
 cat /etc/hosts
@@ -126,9 +126,9 @@ Na janela de **cada um dos Workers** executa-se:
 
 ```bash
 cat /etc/hosts
-# observe se aparece os IPs dos Workers e principalmente do Master (spark-master.local)
-ping spark-master.local # deve responder corretamente.
-start-slave.sh spark://spark-master:7077
+# observe se aparece os IPs dos Workers e principalmente do Master (spark-master)
+ping spark-master # deve responder corretamente.
+/usr/local/spark/sbin/start-slave.sh spark://spark-master:7077
 ```
 
 ### Iniciando o Driver via `spark-shell`
@@ -136,7 +136,7 @@ start-slave.sh spark://spark-master:7077
 Como temos um ALIAS definido no Contêiner:
 
 ```bash
-alias wff='spark-shell --packages "br.cefet-rj.eic:wff:0.5.0"'
+alias wff='spark-shell --packages "br.cefet-rj.eic:wff:0.5.0" --master spark://spark-master:7077'
 ```
 
 Podemos abrir o terminal do **Contêiner Master** e executar
@@ -146,13 +146,13 @@ wff
 ```
 
 Agora podemos invocar tasks pois o arquivo `spark-defaults.conf` configura,
-entre outras coisas, o  `spark.master` apontando para `spark://spark-master.local:7077`
+entre outras coisas, o  `spark.master` apontando para `spark://spark-master:7077`
 
 ```bash
 cat /usr/local/spark/conf/spark-defaults.conf
 # conf/spark-defaults.conf
 
-spark.master                     spark://spark-master.local:7077
+spark.master                     spark://spark-master:7077
 spark.serializer                 org.apache.spark.serializer.KryoSerializer
 spark.driver.memory              2g
 ```
@@ -176,7 +176,7 @@ Isso abrirá 4 páginas no Browser.
 A titulo de informação adicional: quando executamos `start-master.sh` a shell é expandida para:
 
 ```
-/usr/local/spark/sbin/spark-daemon.sh start org.apache.spark.deploy.master.Master 1 --host spark-master.local --port 7077 --webui-port 8080
+/usr/local/spark/sbin/spark-daemon.sh start org.apache.spark.deploy.master.Master 1 --host spark-master --port 7077 --webui-port 8080
 ```
 
 Esta shell **aguarda até o limite de 5 segundos** num loop de execução do código 
@@ -187,7 +187,7 @@ No caso do processo morrer ele mostra o final do arquivo de log como feedback ao
 A shell `spark-daemon.sh` por sua vez invoca um comando tal como este abaixo:
 
 ```
- nohup -- nice -n 0 /usr/local/spark/bin/spark-class org.apache.spark.deploy.master.Master --host spark-master.local --port 7077 --webui-port 8080
+ nohup -- nice -n 0 /usr/local/spark/bin/spark-class org.apache.spark.deploy.master.Master --host spark-master --port 7077 --webui-port 8080
 ```
 
 `spark-class` do diretório `/usr/local/spark/bin` é uma shell que:
@@ -204,5 +204,5 @@ que permite invocar o Spark programaticamente.
 O comando `ps -ef --width 250` mostra o comando final executado com todos os parâmetros. Veja abaixo:
 
 ```
-$JAVA_HOME/bin/java -cp /usr/local/spark/conf/:/usr/local/spark/jars/* -Xmx1g org.apache.spark.deploy.master.Master --host spark-master.local --port 7077 --webui-port 8080
+$JAVA_HOME/bin/java -cp /usr/local/spark/conf/:/usr/local/spark/jars/* -Xmx1g org.apache.spark.deploy.master.Master --host spark-master --port 7077 --webui-port 8080
 ```

@@ -5,3 +5,6 @@ build-R-spark/
 shared/abc.jar
 shared/xpto.jar
 shared/xyz.jar
+DATA/derby.log
+DATA/metastore_db/
+
