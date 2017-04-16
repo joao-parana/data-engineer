@@ -22,15 +22,15 @@ cd ..
 **Para cada um dos Workers** abre-se uma janela de Terminal independente e executa-se em cada uma delas os comandos:
 
 ```bash
-docker run --rm --name spark-worker1 -h spark-worker1.local -p 8081:8081  -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
+docker run --rm --name spark-worker1 -h spark-worker1 -p 8081:8081  -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
 ```
 
 ```bash
-docker run --rm --name spark-worker2 -h spark-worker2.local -p 8082:8081  -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
+docker run --rm --name spark-worker2 -h spark-worker2 -p 8082:8081  -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
 ```
 
 ```bash
-docker run --rm --name spark-worker3 -h spark-worker3.local -p 8083:8081  -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
+docker run --rm --name spark-worker3 -h spark-worker3 -p 8083:8081  -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
 ```
 
 
@@ -39,7 +39,7 @@ docker run --rm --name spark-worker3 -h spark-worker3.local -p 8083:8081  -v $PW
 Abre-se uma janela de Terminal e executa-se:
 
 ```bash
-docker run --rm --name spark-master -h spark-master.local --link spark-worker1 --link spark-worker2  --link spark-worker3 -p 7077:7077 -p 8080:8080 -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
+docker run --rm --name spark-master -h spark-master --link spark-worker1 --link spark-worker2  --link spark-worker3 -p 7077:7077 -p 8080:8080 -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
 ```
 
 ### Listando os Contêineres
@@ -78,6 +78,8 @@ O Spark Master usa o arquivo de configuração de log `org/apache/spark/log4j-de
 No computador Host (macOS, por exemplo), faça:
 
 ```bash
+# limpando networks inúteis criadas anteriormente
+docker network prune
 # criando uma Network para o Spark usar entre os contêineres
 docker network create spark 
 # listando as Networks existentes
@@ -115,7 +117,7 @@ Na janela de **cada um dos Workers** executa-se:
 cat /etc/hosts
 # observe se aparece os IPs dos Workers e principalmente do Master (spark-master.local)
 ping spark-master.local # deve responder corretamente.
-start-slave.sh spark://spark-master.local:7077
+start-slave.sh spark://spark-master:7077
 ```
 
 ### Iniciando o Driver via `spark-shell`
