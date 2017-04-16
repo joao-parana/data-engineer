@@ -79,7 +79,7 @@ No computador Host (macOS, por exemplo), faça:
 
 ```bash
 # criando uma Network para o Spark usar entre os contêineres
-network create spark 
+docker network create spark 
 # listando as Networks existentes
 docker network ls
 # conectando os contêineres a Network criada
@@ -115,7 +115,7 @@ Na janela de **cada um dos Workers** executa-se:
 cat /etc/hosts
 # observe se aparece os IPs dos Workers e principalmente do Master (spark-master.local)
 ping spark-master.local # deve responder corretamente.
-start-slave.sh
+start-slave.sh spark://spark-master.local:7077
 ```
 
 ### Iniciando o Driver via `spark-shell`
