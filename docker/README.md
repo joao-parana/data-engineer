@@ -75,7 +75,27 @@ O Spark Master usa o arquivo de configuração de log `org/apache/spark/log4j-de
 
 #### Configuração de DNS
 
-Enquanto não temos uma configuração correta de DNS nos nossos contêineres fazemos o Work-around abaixo
+No computador Host (macOS, por exemplo), faça:
+
+```bash
+# criando uma Network para o Spark usar entre os contêineres
+network create spark 
+# listando as Networks existentes
+docker network ls
+# conectando os contêineres a Network criada
+docker network connect spark spark-master
+docker network connect spark spark-worker1
+docker network connect spark spark-worker2
+docker network connect spark spark-worker3
+# inspecionando os contêineres
+docker inspect --format='' spark-master | python -m json.tool | egrep "IPAddress\"|\"Gateway"
+docker inspect --format='' spark-worker1 | python -m json.tool | egrep "IPAddress\"|\"Gateway"
+docker inspect --format='' spark-worker2 | python -m json.tool | egrep "IPAddress\"|\"Gateway"
+docker inspect --format='' spark-worker3 | python -m json.tool | egrep "IPAddress\"|\"Gateway"
+```
+
+Para testar podemos usar o `ping` dentro dos contêineres, pingando cada outro.
+Caso não funcione, podemos sempre executar uma alternativa via o Work-around abaixo:
 
 No conteiner spark-master.local faça:
 
@@ -83,7 +103,7 @@ No conteiner spark-master.local faça:
 cat /etc/hosts
 ```
 
-**IMPORTNATE:** Agora copie os ultimas linhas do arquivo `/etc/hosts` para os outros `/etc/hosts` dos Workers. Pode-se usar o comando `vi` para isso.
+Agora copie os ultimas linhas do arquivo `/etc/hosts` para os outros `/etc/hosts` dos Workers. Pode-se usar o comando `vi` para isso.
 
 
 ### Iniciando o Worker 3, 2 e 1 ...
@@ -123,6 +143,7 @@ spark.master                     spark://spark-master.local:7077
 spark.serializer                 org.apache.spark.serializer.KryoSerializer
 spark.driver.memory              2g
 ```
+
 
 
 # Anexo I
