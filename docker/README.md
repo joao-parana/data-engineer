@@ -2,7 +2,6 @@
 
 ## Baixando os binários
 
-
 ```bash
 cd bin
 # Executar uma única vez o comando abaixo
@@ -13,50 +12,153 @@ cd ..
 ## Criando a imagem Docker
 
 ```bash
-docker build -t parana/wff .
+./build-docker-image.sh
 ```
 
-## Iniciando o Contêiner
+## Iniciando os Conteineres
+
+### Iniciando os Conteineres dos Workers 3, 2 e 1 ...
+
+**Para cada um dos Workers** abre-se uma janela de Terminal independente e executa-se em cada uma delas os comandos:
 
 ```bash
-docker run -i -t parana/wff bash
+docker run --rm --name spark-worker1 -h spark-worker1.local -p 8081:8081  -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
 ```
-
-O contêiner vai entrar executando a shell Bash onde podemos inspecionar
 
 ```bash
-find  /tmp/install/build-R-spark
-env | egrep "JAVA|HOME|WFF" | sort
+docker run --rm --name spark-worker2 -h spark-worker2.local -p 8082:8081  -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
 ```
-
-que mostra o seguinte:
 
 ```bash
-HOME=/root
-JAVA_HOME=/opt/jdk
-JAVA_JCE=standard
-JAVA_PACKAGE=jdk
-JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
-JAVA_VERSION_BUILD=13
-JAVA_VERSION_MAJOR=8
-JAVA_VERSION_MINOR=121
-SPARK_HOME=/usr/local/spark
-WFF_CLASSPATH=$(echo /jars/*.jar | tr :)
-WFF_JDBC_PASS=xyz_639
-WFF_JDBC_URL=jdbc:mysql://mysql:3306/wff
-WFF_JDBC_USER=wff
+docker run --rm --name spark-worker3 -h spark-worker3.local -p 8083:8081  -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
 ```
 
-Observe que `WFF_CLASSPATH` não foi expandida mantendo ainda o código bash.
-É preciso descobrir como fazer com que o Docker expanda a expressão `echo /jars/*.jar | tr :` no momento do Build.
+
+### Iniciando o Contêiner do Master 
+
+Abre-se uma janela de Terminal e executa-se:
 
 ```bash
-pwd
-ls -lat
+docker run --rm --name spark-master -h spark-master.local --link spark-worker1 --link spark-worker2  --link spark-worker3 -p 7077:7077 -p 8080:8080 -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
 ```
 
-Quando executamos `sbin/start-master.sh` a shel é expandida para:
+### Listando os Contêineres
+
+O comando abaixo mostra os contêineres carregados na memória.
+
+```bash
+docker ps
+```
+
+
+O comando abaixo mostra todos os contêineres incluindo os que não estão em execução.
+
+```bash
+docker ps -a
+```
+
+
+
+## Iniciando o Cluster
+
+### Iniciando o Master
+
+Na janela de Terminal do Contêiner Master, executa-se:
+
+```bash
+/usr/local/spark/sbin/start-master.sh
+```
+
+ou simplesmente `start-master.sh` pois o path `/usr/local/spark/sbin/` está no `$PATH`
+
+O Spark Master usa o arquivo de configuração de log `org/apache/spark/log4j-defaults.properties` por padrão.
+
+#### Configuração de DNS
+
+Enquanto não temos uma configuração correta de DNS nos nossos contêineres fazemos o Work-around abaixo
+
+No conteiner spark-master.local faça:
+
+```bash
+cat /etc/hosts
+```
+
+**IMPORTNATE:** Agora copie os ultimas linhas do arquivo `/etc/hosts` para os outros `/etc/hosts` dos Workers. Pode-se usar o comando `vi` para isso.
+
+
+### Iniciando o Worker 3, 2 e 1 ...
+
+
+Na janela de **cada um dos Workers** executa-se:
+
+```bash
+cat /etc/hosts
+# observe se aparece os IPs dos Workers e principalmente do Master (spark-master.local)
+ping spark-master.local # deve responder corretamente.
+start-slave.sh
+```
+
+### Iniciando o Driver via `spark-shell`
+
+Como temos um ALIAS definido no Contêiner:
+
+```bash
+alias wff='spark-shell --packages "br.cefet-rj.eic:wff:0.5.0"'
+```
+
+Podemos abrir o terminal do **Contêiner Master** e executar
+
+```bash
+wff
+```
+
+Agora podemos invocar tasks pois o arquivo `spark-defaults.conf` configura,
+entre outras coisas, o  `spark.master` apontando para `spark://spark-master.local:7077`
+
+```
+cat /usr/local/spark/conf/spark-defaults.conf
+# conf/spark-defaults.conf
+
+spark.master                     spark://spark-master.local:7077
+spark.serializer                 org.apache.spark.serializer.KryoSerializer
+spark.driver.memory              2g
+```
+
+
+# Anexo I
+
+## Dinâmica da Inicialização do Master 
+
+A titulo de informação adicional: quando executamos `start-master.sh` a shell é expandida para:
 
 ```
 /usr/local/spark/sbin/spark-daemon.sh start org.apache.spark.deploy.master.Master 1 --host spark-master.local --port 7077 --webui-port 8080
+```
+
+Esta shell **aguarda até o limite de 5 segundos** num loop de execução do código 
+`ps -p "$newpid" -o comm=` testando o resultado contra a string `java` e em seguida
+dorme por dois segundos. Ao final desse intervalo verifica se o processo morreu.
+No caso do processo morrer ele mostra o final do arquivo de log como feedback ao usuário.
+
+A shell `spark-daemon.sh` por sua vez invoca um comando tal como este abaixo:
+
+```
+ nohup -- nice -n 0 /usr/local/spark/bin/spark-class org.apache.spark.deploy.master.Master --host spark-master.local --port 7077 --webui-port 8080
+```
+
+`spark-class` do diretório `/usr/local/spark/bin` é uma shell que:
+
+1. Verifica $SPARK_HOME 
+2. Verifica $JAVA_HOME
+3. Ajusta a variável `$LAUNCH_CLASSPATH`
+4. Constroi o comando usando a classe `org.apache.spark.launcher.Main`
+
+O fonte da classe `Main` pode ser vista em : [https://github.com/apache/spark/blob/master/launcher/src/main/java/org/apache/spark/launcher/Main.java](https://github.com/apache/spark/blob/master/launcher/src/main/java/org/apache/spark/launcher/Main.java) 
+e faz parte de um pacote de funcionalidades [https://github.com/apache/spark/blob/master/launcher/src/main/java/org/apache/spark/launcher/package-info.java](https://github.com/apache/spark/blob/master/launcher/src/main/java/org/apache/spark/launcher/package-info.java)
+que permite invocar o Spark programaticamente.
+
+O comando `ps -ef --width 250` mostra o comando final executado com todos os parâmetros. Veja abaixo:
+
+```
+$JAVA_HOME/bin/java -cp /usr/local/spark/conf/:/usr/local/spark/jars/* -Xmx1g org.apache.spark.deploy.master.Master --host spark-master.local --port 7077 --webui-port 8080
 ```

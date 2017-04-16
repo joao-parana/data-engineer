@@ -1,4 +1,5 @@
 bin/data-engineer-v0.5.0.tar.gz
+bin/spark-2.1.0-bin-hadoop2.7.tgz
 build-R-python-spark/
 build-R-spark/
 shared/abc.jar
