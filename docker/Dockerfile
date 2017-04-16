@@ -167,7 +167,7 @@ RUN cd /desenv/maven && \
 
 ADD conf/slaves /usr/local/spark/conf/
 
-ENV PATH $SPARK_HOME/bin:$PATH
+ENV PATH $SPARK_HOME/bin:$SPARK_HOME/sbin:$PATH
 
 # Spark
 EXPOSE 7077
