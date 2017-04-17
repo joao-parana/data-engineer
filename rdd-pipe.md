@@ -62,3 +62,21 @@ val result = piped.collect()
 result.foreach(println)
 ```
 
+## Abordagem gerando CSV na saida 
+
+Nesta abordagem gera-se um CSV na saida com prefixo contendo nome do host
+onde foi processado a atividade. Informa-se o nome do arquivo de entrada
+`my-input.csv` e o sufixo para o nome de arquivo de saida `my-output.csv`.
+
+Como não é conhecido a priori em qual host o processo Bash/R/Python seria
+executado, coloca-se no nome do arquivo gerado um prefixo com o `$HOSTNAME`.
+No caso deste host se chamar, por exemplo, acme1 teremos como nome do arquivo de 
+saida `acme1_my-output.csv`
+
+val dataRRDD = sc.makeRDD(List("my-input.csv, my-output.csv"))
+val piped = dataRRDD.pipe("/desenv/DATA/echo-only.sh")
+val result = piped.collect()
+result.foreach(println)
+
+
+
