@@ -93,7 +93,12 @@ docker inspect --format='' spark-worker2 | python -m json.tool | egrep "IPAddres
 docker inspect --format='' spark-worker3 | python -m json.tool | egrep "IPAddress\"|\"Gateway"
 ```
 
-Para testar podemos usar o `ping` dentro dos contêineres, pingando cada outro.
+Para testar podemos usar o `ping` dentro dos contêineres, pingando o Master.
+
+```bash
+ping spark-master -c 3
+```
+
 Caso não funcione, podemos sempre executar uma alternativa via o Work-around abaixo:
 
 No conteiner spark-master faça:
@@ -103,6 +108,8 @@ cat /etc/hosts
 ```
 
 Agora copie os ultimas linhas do arquivo `/etc/hosts` para os outros `/etc/hosts` dos Workers. Pode-se usar o comando `vi` para isso.
+
+**Atenção:** este Work-around só é necessário se o procedimento com o comando `docker network` descrito anteriormente, não funcionar !
 
 
 ### Iniciando o Master
@@ -125,9 +132,7 @@ O Spark Master usa o arquivo de configuração de log `org/apache/spark/log4j-de
 Na janela de **cada um dos Workers** executa-se:
 
 ```bash
-cat /etc/hosts
-# observe se aparece os IPs dos Workers e principalmente do Master (spark-master)
-ping spark-master # deve responder corretamente.
+ping spark-master -c 3 # deve responder corretamente.
 /usr/local/spark/sbin/start-slave.sh spark://spark-master:7077
 ```
 
