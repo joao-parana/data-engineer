@@ -70,14 +70,39 @@ onde foi processado a atividade. Informa-se o nome do arquivo de entrada
 
 Como não é conhecido a priori em qual host o processo Bash/R/Python seria
 executado, coloca-se no nome do arquivo gerado um prefixo com o `$HOSTNAME`.
-No caso deste host se chamar, por exemplo, acme1 teremos como nome do arquivo de 
-saida `acme1_my-output.csv`
+No caso deste host se chamar, por exemplo, `arietis` teremos como nome do arquivo de 
+saida `arietis_my-output.csv`
 
-```scala
 val dataRRDD = sc.makeRDD(List("my-input.csv, my-output.csv"))
 val piped = dataRRDD.pipe("/desenv/DATA/echo-only.sh")
 val result = piped.collect()
 result.foreach(println)
+
+
+```scala
+val dataRRDD = sc.makeRDD(List(
+    "my-input-1.csv, my-output-1.csv",
+    "my-input-2.csv, my-output-2.csv",
+    "my-input-3.csv, my-output-3.csv",
+    "my-input-4.csv, my-output-4.csv",
+    "my-input-5.csv, my-output-5.csv",
+    "my-input-6.csv, my-output-6.csv"
+))
+val piped = dataRRDD.pipe("/desenv/DATA/echo-only.sh")
+val result = piped.collect()
+result.foreach(println)
+```
+
+Veja um exemplo de execução 
+
+
+```
+Worker on aldebaran,my-input-1.csv, my-output-1.csv
+Worker on arietis,my-input-2.csv, my-output-2.csv
+Worker on aldebaran,my-input-3.csv, my-output-3.csv
+Worker on arietis,my-input-4.csv, my-output-4.csv
+Worker on aldebaran,my-input-5.csv, my-output-5.csv
+Worker on aldebaran,my-input-6.csv, my-output-6.csv
 ```
 
 
