@@ -43,7 +43,6 @@ Abre-se uma janela de Terminal e executa-se:
 
 ```bash
 docker run --rm --name spark-master -h spark-master \
-           --link spark-worker1 --link spark-worker2  --link spark-worker3 \
            -p 7077:7077 -p 8080:8080 \
            -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
 ```
