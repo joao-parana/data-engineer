@@ -36,7 +36,7 @@ ENV WFF_JDBC_PASS xyz_639
 # jdbc:mysql://[host1][:port1][,[host2][:port2]]...[/[database]] [?propertyName1=propertyValue1[&propertyName2=propertyValue2]...]
 ENV WFF_JDBC_URL  jdbc:mysql://mysql:3306/wff
 
-RUN mkdir /jars
+# RUN mkdir /jars
 ADD shared /jars
 ADD bin /tmp/install/bin 
 ADD build-R-spark /tmp/install/build-R-spark
@@ -129,7 +129,7 @@ RUN cd /tmp/install/build-R-spark/spark && ls && \
     tar xzf spark-2.1.0-bin-hadoop2.7.tgz && \
     echo "••• `date` - ls -la /usr/local/" && \
     ls -la /usr/local/ && \
-    mv spark-2.1.0-bin-hadoop2.7 /usr/local/spark &&\
+    mv spark-2.1.0-bin-hadoop2.7 /usr/local/spark && \
     mkdir -p /usr/local/spark/tmp && \
     echo "••• `date` - ls -la /usr/local/spark" && \
     ls -la /usr/local/spark
@@ -149,6 +149,16 @@ RUN curl -O http://archive.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries
 
 ADD maven/pom.xml /desenv/maven/pom.xml
 ADD maven/wff-0.5.0.jar /desenv/maven/wff-0.5.0.jar
+
+ADD gateway /tmp/gateway
+RUN ls -la /tmp/gateway/ && \
+    echo "`date` - tar -tvf /tmp/gateway/wff-gateway-install.tar" && \
+    tar -tvf /tmp/gateway/wff-gateway-install.tar && \
+    mkdir -p /usr/local/wff-gateway/bin && \
+    cd /usr/local/wff-gateway/bin && \
+    tar -xzf /tmp/gateway/wff-gateway-install.tar
+
+ENV PATH /usr/local/wff-gateway/bin:$PATH
 
 RUN cd /desenv/maven && \
     grep -B 2 -A 2 artifactId pom.xml && \

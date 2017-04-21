@@ -23,7 +23,7 @@ cd ..
 
 ```bash
 docker run --rm --name spark-worker1 -h spark-worker1 -p 8081:8081 \
-           -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
+            -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
 ```
 
 ```bash
@@ -43,6 +43,7 @@ Abre-se uma janela de Terminal e executa-se:
 
 ```bash
 docker run --rm --name spark-master -h spark-master \
+           -p 9090:9090 \
            -p 7077:7077 -p 8080:8080 \
            -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
 ```
