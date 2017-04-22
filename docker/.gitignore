@@ -7,4 +7,6 @@ shared/xpto.jar
 shared/xyz.jar
 DATA/derby.log
 DATA/metastore_db/
+maven/bin/[a-z]*
+maven/pkg/darwin-amd64/
 

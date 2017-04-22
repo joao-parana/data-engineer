@@ -167,6 +167,57 @@ open http://localhost:8083
 
 Isso abrirá 4 páginas no Browser.
 
+## Build de Programas GO
+
+Programas GO quando compilados são convertidos para código binário e ficam
+muito eficientes. Além disso GO é uma linguagem de alto nível com suporte 
+nativo a multithreading e TCP/IP.
+
+### Instalando o GB - _builder_ baseado em projeto.
+
+```bash
+go get github.com/constabulary/gb/...
+```
+
+Mais detalhes em [https://getgb.io/examples/getting-started/](https://getgb.io/examples/getting-started/)
+
+O `gb` fica instalado em `$GOPATH/bin`
+
+### Fazendo o Build de um projeto
+
+```bash
+cd maven/src
+$GOPATH/bin/gb build main/go/cmd/to_upper
+```
+
+Para testar
+
+```bash
+cat ../pom.xml | ../bin/to_upper
+```
+
+### Fonte do programa de teste
+
+Neste caso o programa `to_upper.go` é este mostrado abaixo
+
+```go
+package main
+
+import (
+  "bufio"
+  "fmt"
+  "os"
+  "strings"
+)
+
+func main() {
+  scanner := bufio.NewScanner(os.Stdin)
+  for scanner.Scan() {
+    fmt.Fprintf(os.Stdout, strings.ToUpper(scanner.Text()+"\n"))
+  }
+}
+```
+
 
 # Anexo I
 
