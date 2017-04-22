@@ -1,5 +1,4 @@
 bin/data-engineer-v0.5.0.tar.gz
-bin/spark-2.1.0-bin-hadoop2.7.tgz
 build-R-python-spark/
 build-R-spark/
 shared/abc.jar
@@ -8,5 +7,9 @@ shared/xyz.jar
 DATA/derby.log
 DATA/metastore_db/
 maven/bin/[a-z]*
-maven/pkg/darwin-amd64/
+maven/pkg/
+maven/src/file
+maven/src/github.com/
+maven/src/golang.org/
+maven/src/gopkg.in/
 
