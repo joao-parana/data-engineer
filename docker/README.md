@@ -173,6 +173,14 @@ Programas GO quando compilados são convertidos para código binário e ficam
 muito eficientes. Além disso GO é uma linguagem de alto nível com suporte 
 nativo a multithreading e TCP/IP.
 
+Precisamos fazer o setup do `$GOPATH` para dentro do projeto
+
+```
+export GOPATH=./docker/maven
+# confeindo !
+echo $GOPATH
+```
+
 ### Instalando o GB - _builder_ baseado em projeto.
 
 ```bash
@@ -185,8 +193,9 @@ O `gb` fica instalado em `$GOPATH/bin`
 
 ### Fazendo o Build de um projeto
 
+
 ```bash
-cd maven/src
+cd maven
 $GOPATH/bin/gb build main/go/cmd/to_upper
 ```
 
@@ -216,6 +225,29 @@ func main() {
     fmt.Fprintf(os.Stdout, strings.ToUpper(scanner.Text()+"\n"))
   }
 }
+```
+
+### Fonte do Servidor WEB
+
+Inicialmente obtemos as dependências do `gin` que é um framework WEB leve
+e eficiente que ocupa menos de 10 MB
+
+```
+go get golang.org/x/net/context
+go get golang.org/x/text/encoding
+go get golang.org/x/crypto/ssh/terminal
+go get golang.org/x/tools/go/buildutil
+go get github.com/manucorporat/sse 
+go get github.com/mattn/go-isatty
+go get github.com/dustin/go-broadcast
+go get github.com/manucorporat/stats
+go get gopkg.in/go-playground/validator.v8
+go get gopkg.in/yaml.v2 
+go get gopkg.in/gin-gonic/gin.v1
+```
+
+```bash
+$GOPATH/bin/gb build main/go/cmd/to_upper
 ```
 
 
