@@ -7,17 +7,16 @@ FROM java:openjdk-8
 
 #
 # Esta imagem da qual herdo as funcionalidades inclui Debian Jessie.
-# Sobre ela instalo o Git, o Maven, o Python, o R, o Spark e o cliente MySQL
+# Sobre ela instalo o Git, Maven, Python, R, Spark, GO, curl, gcc, wget, 
+# mercurial e o cliente MySQL
 #
 # https://github.com/anapsix/docker-alpine-java/tree/master/8/jdk
 #
 
 MAINTAINER João Antonio Ferreira "joao.parana@gmail.com"
 
-ENV REFRESHED_AT 2017-04-14
+ENV REFRESHED_AT 2017-04-22
 
-# apk search gpg && \
-# apk add -y  gpgme
 RUN apt-get update && \  
     apt-get install -y lsof logrotate mysql-client git gcc make curl
 
@@ -41,35 +40,12 @@ ADD shared /jars
 ADD bin /tmp/install/bin 
 ADD build-R-spark /tmp/install/build-R-spark
 
-# RUN export CLASSPATH=$(find /jars -name '*.jar' -printf '%p:' | sed 's/:$//')
-# RUN export CLASSPATH=$(find /jars -name '*.jar' -printf '%p:').
-# RUN export CLASSPATH=$(JARS=(/jars/*.jar); IFS=:; echo "${JARS[*]}")
-# RUN export CLASSPATH=$(echo /jars/*.jar | tr ' ' ':')
 ENV WFF_CLASSPATH "$(echo /jars/*.jar | tr ' ' ':')"
 COPY conf/.bash_profile /etc/profile.d/wff_profile
 
 # RUN /tmp/install/bin/install-Python
 
 RUN apt-get install -y python
-# RUN python -m ensurepip
-# RUN rm -r /usr/lib/python*/ensurepip
-# RUN pip install --upgrade pip setuptools
-
-# RUN /tmp/install/bin/install-R
-
-# RUN cd /tmp/install/build-R-spark/R && ls && \
-#     tar xzf R-3.3.3.tar.gz && \
-#     cd R-3.3.3 && echo "Instalando o R no diretório /usr/local/R"
-# RUN apt-get install -y  gcc gfortran
-# RUN cp /tmp/install/build-R-spark/R/R-3.3.1-r0.apk .
-# wget https://github.com/sgerrand/alpine-pkg-R/releases/download/3.3.1-r0/R-3.3.1-r0.apk && \
-# RUN apt-get install -y  ca-certificates wget && \
-#     wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://github.com/sgerrand/alpine-pkg-R/releases/download/3.3.1-r0/sgerrand.rsa.pub && \
-#     apt-get install -y  R-3.3.1-r0.apk
-# # RUN apt-get install -y  R R-dev
-# RUN cd /tmp/install/build-R-spark/R/R-3.3.3 && \
-#     ./configure --prefix=/usr/local/R --with-readline=no --with-x=no && \
-#     make && make install
 
 RUN apt-get update \ 
   && apt-get install -y --no-install-recommends \
@@ -81,6 +57,14 @@ RUN apt-get update \
     ca-certificates \
     fonts-texgyre \
   && rm -rf /var/lib/apt/lists/*
+
+# Instala o GO para criar um Web Server para testes de download distribuido
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    ca-certificates \
+    mercurial \
+    git-core
+
+RUN curl -s https://storage.googleapis.com/golang/go1.8.1.linux-amd64.tar.gz | tar -C /usr/local -xz
 
 ## Configure default locale, see https://github.com/rocker-org/rocker/issues/19
 RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
@@ -103,6 +87,7 @@ ENV R_BASE_VERSION 3.3.3
 
 ## Now install R and littler, and create a link for littler in /usr/local/bin
 ## Also set a default CRAN repo, and make sure littler knows about it too
+
 RUN apt-get update \
   && apt-get install -t unstable -y --no-install-recommends \
     littler \
@@ -117,9 +102,7 @@ RUN apt-get update \
   && ln -s /usr/share/doc/littler/examples/installGithub.r /usr/local/bin/installGithub.r \
   && ln -s /usr/share/doc/littler/examples/testInstalled.r /usr/local/bin/testInstalled.r \
   && install.r docopt \
-  && rm -rf /tmp/downloaded_packages/ /tmp/*.rds \
-  && rm -rf /var/lib/apt/lists/*
-  
+  && rm -rf /tmp/downloaded_packages/ /tmp/*.rds 
 
 RUN ls -la /usr/bin/R
 
@@ -147,8 +130,7 @@ RUN curl -O http://archive.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries
   rm apache-maven-$MAVEN_VERSION-bin.tar.gz && \
   mv apache-maven-$MAVEN_VERSION /usr/local/mvn
 
-ADD maven/pom.xml /desenv/maven/pom.xml
-ADD maven/wff-0.5.0.jar /desenv/maven/wff-0.5.0.jar
+ADD maven /desenv/maven
 
 ADD gateway /tmp/gateway
 RUN ls -la /tmp/gateway/ && \
@@ -161,6 +143,7 @@ RUN mkdir -p /usr/local/wff-gateway/bin && \
 
 ENV PATH /usr/local/wff-gateway/bin:$PATH
 
+
 RUN cd /desenv/maven && \
     grep -B 2 -A 2 artifactId pom.xml && \
     echo "••• `date` - Instalando o WfF localmente" && \
@@ -170,7 +153,15 @@ RUN cd /desenv/maven && \
         -DartifactId=wff \
         -Dversion=0.5.0 \
         -Dpackaging=jar && \
-    echo "••• `date` - WfF instalado localmente com sucesso." && \
+    echo "••• `date` - WfF instalado localmente com sucesso." 
+
+RUN cd ~/.m2/ && \
+    tar -xzf /desenv/maven/m2-repository/org-without-scala.tar.gz && \
+    tar -xzf /desenv/maven/m2-repository/some-org-apache.tar.gz && \
+    tar -xzf /desenv/maven/m2-repository/scala.tar.gz && \
+    tar -xzf /desenv/maven/m2-repository/outros.tar.gz
+
+RUN cd /desenv/maven && \
     echo "••• `date` - Fazendo o build de projeto simples." && \
     echo "••• `date` - O Download dos artefatos pode demorar vários minutos, por favor aguarede !" && \
     mvn -q -Dmaven.test.skip=true clean install && \
@@ -187,26 +178,10 @@ EXPOSE 8080
 # WEB UI para Slave
 EXPOSE 8081
 
-# Instala o GO para criar um Web Server para testes de download distribuido
-RUN apt-get update && apt-get install --no-install-recommends -y \
-    ca-certificates \
-    curl \
-    mercurial \
-    git-core
-RUN curl -s https://storage.googleapis.com/golang/go1.4.2.linux-amd64.tar.gz | tar -v -C /usr/local -xz
-
 ENV GOPATH /go
 ENV GOROOT /usr/local/go
 ENV PATH /usr/local/go/bin:/go/bin:/usr/local/bin:$PATH
 
 VOLUME /spark/DATA
 
-# Devido a este erro abaixo, temos que instalar procps
-# BusyBox v1.24.2 - ps: unrecognized option: p
-# RUN apt-get install -y  procps
-
 CMD ["/bin/bash"]
-
-
-
-
