@@ -82,7 +82,7 @@ docker ps -a
 
 ## Iniciando o Cluster
 
-#### Configuração de DNS e Network
+#### Verificando a Configuração de DNS e Network
 
 No computador Host (macOS, por exemplo), faça:
 
@@ -96,23 +96,14 @@ docker inspect --format='' spark-worker2 | python -m json.tool | egrep "IPAddres
 docker inspect --format='' spark-worker3 | python -m json.tool | egrep "IPAddress\"|\"Gateway"
 ```
 
-Para testar podemos usar o `ping` dentro dos contêineres, pingando o Master.
+Para testar podemos usar o `ping` dentro dos contêineres, pingando o Master e os slaves.
 
 ```bash
-ping spark-master -c 3
+ping spark-master -c 3 &&  \
+ping spark-worker1 -c 3 && \
+ping spark-worker2 -c 3 && \
+ping spark-worker3 -c 3
 ```
-
-Caso não funcione, podemos sempre executar uma alternativa via o Work-around abaixo:
-
-No conteiner spark-master faça:
-
-```bash
-cat /etc/hosts
-```
-
-Agora copie os ultimas linhas do arquivo `/etc/hosts` para os outros `/etc/hosts` dos Workers. Pode-se usar o comando `vi` para isso.
-
-**Atenção:** este Work-around só é necessário se o procedimento com o comando `docker network` descrito anteriormente, não funcionar !
 
 
 ### Iniciando o Master
@@ -214,3 +205,18 @@ O comando `ps -ef --width 250` mostra o comando final executado com todos os par
 ```
 $JAVA_HOME/bin/java -cp /usr/local/spark/conf/:/usr/local/spark/jars/* -Xmx1g org.apache.spark.deploy.master.Master --host spark-master --port 7077 --webui-port 8080
 ```
+
+## Workaround para Network
+
+**Atenção:** este Work-around só é necessário se o procedimento com o comando `docker network` descrito anteriormente, não funcionar !
+
+Caso a network spark criada não funcione, podemos sempre executar uma alternativa via o Work-around abaixo:
+
+No conteiner spark-master faça:
+
+```bash
+cat /etc/hosts
+```
+
+Agora edite as ultimas linhas do arquivo `/etc/hosts` adicionando referências para os outros contêineres. Pode-se usar o comando `vi` para isso.
+
