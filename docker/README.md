@@ -17,22 +17,38 @@ cd ..
 
 ## Iniciando os Conteineres
 
+### Configuração de DNS e Network
+
+No computador Host (macOS, por exemplo), faça:
+
+```bash
+# limpando networks inúteis criadas anteriormente
+docker network prune -f
+# criando uma Network para o Spark usar entre os contêineres
+docker network create spark 
+# listando as Networks existentes
+docker network ls
+```
+
 ### Iniciando os Conteineres dos Workers 3, 2 e 1 ...
 
 **Para cada um dos Workers** abre-se uma janela de Terminal independente e executa-se em cada uma delas os comandos:
 
 ```bash
 docker run --rm --name spark-worker1 -h spark-worker1 -p 8081:8081 \
-            -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
+           --network=spark \
+           -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
 ```
 
 ```bash
 docker run --rm --name spark-worker2 -h spark-worker2 -p 8082:8081 \
+           --network=spark \
            -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
 ```
 
 ```bash
 docker run --rm --name spark-worker3 -h spark-worker3 -p 8083:8081 \
+           --network=spark \
            -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
 ```
 
@@ -43,6 +59,7 @@ Abre-se uma janela de Terminal e executa-se:
 
 ```bash
 docker run --rm --name spark-master -h spark-master \
+           --network=spark \
            -p 9090:9090 \
            -p 7077:7077 -p 8080:8080 \
            -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
@@ -70,22 +87,8 @@ docker ps -a
 No computador Host (macOS, por exemplo), faça:
 
 ```bash
-# limpando networks inúteis criadas anteriormente
-docker network prune
-# criando uma Network para o Spark usar entre os contêineres
-docker network create spark 
 # listando as Networks existentes
 docker network ls
-# conectando os contêineres a Network criada
-docker network connect spark spark-master
-docker network connect spark spark-worker1
-docker network connect spark spark-worker2
-docker network connect spark spark-worker3
-# desconectando os contêineres da Network bridge criada pelo comando docker run
-docker network disconnect bridge spark-master
-docker network disconnect bridge spark-worker1
-docker network disconnect bridge spark-worker2
-docker network disconnect bridge spark-worker3
 # inspecionando os contêineres
 docker inspect --format='' spark-master | python -m json.tool | egrep "IPAddress\"|\"Gateway"
 docker inspect --format='' spark-worker1 | python -m json.tool | egrep "IPAddress\"|\"Gateway"
