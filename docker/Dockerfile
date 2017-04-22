@@ -153,10 +153,11 @@ ADD maven/wff-0.5.0.jar /desenv/maven/wff-0.5.0.jar
 ADD gateway /tmp/gateway
 RUN ls -la /tmp/gateway/ && \
     echo "`date` - tar -tvf /tmp/gateway/wff-gateway-install.tar" && \
-    tar -tvf /tmp/gateway/wff-gateway-install.tar && \
-    mkdir -p /usr/local/wff-gateway/bin && \
+    tar -tvf /tmp/gateway/wff-gateway-install.tar
+
+RUN mkdir -p /usr/local/wff-gateway/bin && \
     cd /usr/local/wff-gateway/bin && \
-    tar -xzf /tmp/gateway/wff-gateway-install.tar
+    tar -xf /tmp/gateway/wff-gateway-install.tar
 
 ENV PATH /usr/local/wff-gateway/bin:$PATH
 
