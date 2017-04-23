@@ -138,6 +138,7 @@ RUN ls -la /tmp/gateway/ && \
     tar -tvf /tmp/gateway/wff-gateway-install.tar
 
 RUN mkdir -p /usr/local/wff-gateway/bin && \
+    mkdir -p /usr/local/wff-gateway/logs && \
     cd /usr/local/wff-gateway/bin && \
     tar -xf /tmp/gateway/wff-gateway-install.tar
 

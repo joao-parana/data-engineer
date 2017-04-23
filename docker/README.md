@@ -176,8 +176,8 @@ nativo a multithreading e TCP/IP.
 Precisamos fazer o setup do `$GOPATH` para dentro do projeto
 
 ```
-export GOPATH=./docker/maven
-# confeindo !
+export GOPATH=$HOME/docker/maven
+# conferindo !
 echo $GOPATH
 ```
 
