@@ -1,0 +1,34 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          wffgateway
+# Required-Start:    $local_fs $all killprocs
+# Required-Stop:
+# Default-Start:     3
+# Default-Stop:
+# Short-Description: executed when entering runlevel 3 
+### END INIT INFO
+
+JAVA_HOME=/usr/lib/jvm/java-8-oracle
+PATH=/sbin:/bin:$JAVA_HOME/bin
+
+do_start () {
+  su - spark --command "/usr/local/wff-gateway/bin/start-wff-gateway.sh"
+}
+
+case "$1" in
+  start)
+  do_start
+  ;;
+  restart|reload|force-reload)
+  echo "Error: argument '$1' not supported" >&2
+  exit 3
+  ;;
+  stop|status)
+  # No-op
+  echo "Error: argument '$1' not supported yet" >&2
+  ;;
+  *)
+  echo "Usage: $0 start|stop" >&2
+  exit 3
+  ;;
+esac

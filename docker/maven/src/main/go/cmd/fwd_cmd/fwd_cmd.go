@@ -10,10 +10,19 @@ import (
 )
 
 func main() {
+	host := "127.0.0.1"
+	port := "19092"
+	argsWithoutProg := os.Args[1:]
+	if len(argsWithoutProg) > 0 {
+		host = argsWithoutProg[0]
+	}
+	if len(argsWithoutProg) > 1 {
+		port = argsWithoutProg[1]
+	}
 	// connect to this socket
-	conn, err := net.Dial("tcp", "127.0.0.1:9090")
+	conn, err := net.Dial("tcp", host+":"+port)
 	if err != nil {
-		log.Fatal("net.Dial(\"tcp\", \"127.0.0.1:9090\") executed. ERROR: ", err)
+		log.Fatal("net.Dial(\"tcp\", \""+host+":"+port+"\") executed. ERROR: ", err)
 	}
 	reader := bufio.NewReader(os.Stdin)
 	line, _ := reader.ReadString('\n')

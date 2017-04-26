@@ -79,6 +79,8 @@ RUN echo "••••• `date` - Verificando se existe debian-unstable.list : 
     echo "••••• `date` - Verificando se existe default:  ls /etc/apt/apt.conf.d/" && \
     ls -lat /etc/apt/apt.conf.d/
 
+RUN apt-get update && apt-get install -y sudo
+
 ## Use Debian unstable via pinning -- new style via APT::Default-Release
 RUN echo "deb http://http.debian.net/debian sid main" > /etc/apt/sources.list.d/debian-unstable.list \
   && echo 'APT::Default-Release "testing";' > /etc/apt/apt.conf.d/default
@@ -91,7 +93,7 @@ ENV R_BASE_VERSION 3.3.3
 RUN apt-get update \
   && apt-get install -t unstable -y --no-install-recommends \
     littler \
-                r-cran-littler \
+    r-cran-littler \
     r-base=${R_BASE_VERSION}* \
     r-base-dev=${R_BASE_VERSION}* \
     r-recommended=${R_BASE_VERSION}* \
@@ -170,6 +172,15 @@ RUN cd /desenv/maven && \
 
 ADD conf/slaves /usr/local/spark/conf/
 
+ADD conf/etc/init.d /etc/init.d
+ADD conf/start-wff-gateway.sh /usr/local/wff-gateway/bin/start-wff-gateway.sh
+
+RUN echo "#" >> /etc/profile && \
+    echo "# Suporte ao WfF" >> /etc/profile &&\
+    echo "#" >> /etc/profile && \
+    echo ". /etc/profile.d/wff_profile" >> /etc/profile && \
+    echo "#" >> /etc/profile
+
 ENV PATH $SPARK_HOME/bin:$SPARK_HOME/sbin:$PATH
 
 # Spark
@@ -179,10 +190,32 @@ EXPOSE 8080
 # WEB UI para Slave
 EXPOSE 8081
 
-ENV GOPATH /go
+ENV GOPATH /desenv/maven
 ENV GOROOT /usr/local/go
-ENV PATH /usr/local/go/bin:/go/bin:/usr/local/bin:$PATH
+ENV PATH /usr/local/go/bin:/desenv/maven/bin:/usr/local/bin:$PATH
+
+# Fazendo o build dos programas GO
+RUN cd /desenv/maven && echo $GOPATH && \
+    go get github.com/constabulary/gb/... && \
+    $GOPATH/bin/gb build main/go/cmd/to_upper && \
+    echo "••• `date` - Testando o programa compilado em GO" && \
+    cat pom.xml | $GOPATH/bin/to_upper && \
+    cd /desenv/maven/src && \
+    $GOPATH/bin/gb build all
+
+# flags possíveis para o comando 'test' podem ser vistos no link abaixo: 
+# http://wiki.bash-hackers.org/commands/classictest
+#
+RUN if test -e $GOPATH/bin/fwd_cmd && \
+       test -e /etc/init.d/wffgateway && \
+       test -e /usr/local/wff-gateway/bin/wff-gateway.jar ; \
+    then \
+      echo "••• `date` - Forward de Comando para o Gateway habilitado"; \
+    fi
 
 VOLUME /spark/DATA
+
+RUN groupadd spark && useradd -ms /bin/bash -r -g spark spark && usermod -aG root spark
+
 
 CMD ["/bin/bash"]

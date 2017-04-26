@@ -80,6 +80,21 @@ O comando abaixo mostra todos os contêineres incluindo os que não estão em ex
 docker ps -a
 ```
 
+### Inspecionando o volume /spark/DATA
+
+O volume `/spark/DATA` é compartilhado entre todos os conteineres (master e workers) 
+e pode ser inspecionado, usado e mantido por outro contêiner. Veja o exemplo simples
+abaixo:
+
+```bash
+docker run -v $PWD/DATA:/spark/DATA -w /spark/DATA busybox ls -la
+```
+
+Neste exemplo listamos o conteúdo do volume `/spark/DATA` usando a imagem `busybox`
+que fornece comandos de bash numa imagem de apenas 1.11 MB.
+
+
+
 ## Iniciando o Cluster
 
 #### Verificando a Configuração de DNS e Network
@@ -173,7 +188,7 @@ Programas GO quando compilados são convertidos para código binário e ficam
 muito eficientes. Além disso GO é uma linguagem de alto nível com suporte 
 nativo a multithreading e TCP/IP.
 
-Precisamos fazer o setup do `$GOPATH` para dentro do projeto
+Precisamos fazer o setup do `$GOPATH` para dentro do projeto.
 
 ```
 export GOPATH=$HOME/docker/maven
@@ -248,7 +263,75 @@ go get gopkg.in/gin-gonic/gin.v1
 
 ```bash
 $GOPATH/bin/gb build main/go/cmd/to_upper
+$GOPATH/bin/gb build all
 ```
+
+## Benchmark no Spark com Scala
+
+Dado que desejamos medir o tempo de execução para rotinas específicas
+podemos criar um método simples para encapsular a chamada e a medida de tempo
+total para executar tais rotinas.
+
+```scala
+// Define a simple benchmark util function
+def benchmark(name: String)(f: => Unit) {
+  val startTime = System.nanoTime
+  f
+  val endTime = System.nanoTime
+  println(s"Time taken in $name: " + (endTime - startTime).toDouble / 1000000000 + " seconds")
+}
+```
+
+Podemos agora medir o tempo para somar 1 milhão de inteiros
+
+```scala
+benchmark("Spark million") {
+  spark.range(1000L * 1000).selectExpr("sum(id)").show()
+}
+```
+
+E também de um `count()` de um `join()`
+
+```scala
+benchmark("Spark Join") {
+  spark.range(1000L * 1000).join(spark.range(1000L).toDF(), "id").count()
+}
+```
+
+ou de um `crossJoin`
+
+```scala
+benchmark("Spark Cross Join") {
+  spark.range(10000L).toDF("id").crossJoin(spark.range(10000L).toDF("xx")).count()
+}
+```
+
+O Spark permite a analise de Planos de Execução. Veja um exemplo
+
+```scala
+spark.range(10000L).toDF("id").
+    crossJoin(spark.range(10000L).toDF("xx")).
+    selectExpr("count(*)").explain(true)
+```
+
+Outro exemplo:
+
+```scala
+spark.range(1000).filter("id > 100").selectExpr("sum(id)").explain()
+```
+
+Resultado:
+
+```
+== Physical Plan ==
+*HashAggregate(keys=[], functions=[sum(id#404L)])
++- Exchange SinglePartition
+   +- *HashAggregate(keys=[], functions=[partial_sum(id#404L)])
+      +- *Filter (id#404L > 100)
+         +- *Range (0, 1000, step=1, splits=Some(1))
+```
+
+> When an operator has a star around it (*), whole-stage code generation is enabled. In the following case, Range, Filter, and the two Aggregates are both running with whole-stage code generation. Exchange does not have whole-stage code generation because it is sending data across the network. This query plan has two "stages" (divided by Exchange). In the first stage, three operators (Range, Filter, Aggregate) are collapsed into a single function. In the second stage, there is only a single operator (Aggregate).
 
 
 # Anexo I
