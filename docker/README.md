@@ -113,6 +113,16 @@ Outro exemplo:
 docker run -v $PWD/DATA:/spark/DATA -w /spark/DATA busybox cat f_cmd.sh
 ```
 
+### Listando ID, NAME, STATUS e SIZE de todos os conteineres que usam a rede spark
+
+```bash
+alias dl='docker ps --all --format "table {{.ID}}\t{{.Names}}\t{{.Status}}\t{{.Size}}" --size --filter network=spark'
+dl
+```
+
+A lista completa de opções para o comando `docker ps` pode ser vista em
+[https://docs.docker.com/engine/reference/commandline/ps/](https://docs.docker.com/engine/reference/commandline/ps/)
+
 ## Iniciando o Cluster
 
 #### Verificando a Configuração de DNS e Network

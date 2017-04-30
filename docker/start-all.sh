@@ -21,19 +21,20 @@ docker run --rm --name spark-master -h spark-master \
            --network=spark \
            -p 19092:19092 \
            -p 7077:7077 -p 8080:8080 \
-           -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
+           -v $PWD/DATA:/spark/DATA -d parana/wff
 
 echo "`date` - Iniciando os contêineres Workers"
 docker run --rm --name spark-worker1 -h spark-worker1 -p 8081:8081 \
            --network=spark \
-           -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
+           -v $PWD/DATA:/spark/DATA -d parana/wff
 docker run --rm --name spark-worker2 -h spark-worker2 -p 8082:8081 \
            --network=spark \
-           -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
+           -v $PWD/DATA:/spark/DATA -d parana/wff
 docker run --rm --name spark-worker3 -h spark-worker3 -p 8083:8081 \
            --network=spark \
-           -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
+           -v $PWD/DATA:/spark/DATA -d parana/wff
 
 echo "`date` - Listando os contêineres em execução e os parados"
 docker ps -a 
-
+sleep 10 
+docker ps

@@ -12,8 +12,8 @@ if [[ $HOST_NAME == *"master"* ]]; then
   sbin/start-master.sh
 fi
 if [[ $HOST_NAME == *"worker"* ]]; then
-  echo "`date` - Este é um dos Workers"
-  sbin/start-slave.sh
+  echo "`date` - Este é um dos Workers. É obrigado passar o identificador do master"
+  sbin/start-slave.sh spark://spark-master:7077
 fi
 echo "`date` - Spark iniciado em background. Não dá pra saber se ficou OK." >> /home/spark/logs/log.stdout
 echo "`date` - Use ps -ef | grep spark para verificar o processo" >> /home/spark/logs/log.stdout
