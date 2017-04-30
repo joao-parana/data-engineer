@@ -79,7 +79,11 @@ RUN echo "••••• `date` - Verificando se existe debian-unstable.list : 
     echo "••••• `date` - Verificando se existe default:  ls /etc/apt/apt.conf.d/" && \
     ls -lat /etc/apt/apt.conf.d/
 
+# Instalando o sudo
 RUN apt-get update && apt-get install -y sudo
+
+# Instalando NFS
+RUN apt-get update && apt-get install -y nfs-kernel-server nfs-common
 
 ## Use Debian unstable via pinning -- new style via APT::Default-Release
 RUN echo "deb http://http.debian.net/debian sid main" > /etc/apt/sources.list.d/debian-unstable.list \
@@ -215,7 +219,28 @@ RUN if test -e $GOPATH/bin/fwd_cmd && \
 
 VOLUME /spark/DATA
 
-RUN groupadd spark && useradd -ms /bin/bash -r -g spark spark && usermod -aG root spark
+RUN groupadd spark && useradd -u 2017 -ms /bin/bash -r -g spark spark && usermod -aG root,mail spark
 
+RUN MY_UID=`grep spark /etc/passwd | cut -d: -f3` && echo "`date` - Usuário spark criado e adicionando no grupo root. UID = $MY_UID"
 
-CMD ["/bin/bash"]
+RUN mkdir -p /home/spark/bin && mkdir -p /home/spark/logs && \
+    chown -R spark:spark /usr/local/wff-gateway && \
+    chown -R spark:spark /usr/local/spark && \
+    chown -R spark:spark /home/spark
+    
+ADD conf/start-spark-cluster.sh /home/spark/bin/start-spark-cluster.sh
+
+# RUN showmount -e mulder 
+
+ADD start-master-or-worker.sh /bin/start-master-or-worker.sh
+
+RUN chown -R spark:spark /home/spark/bin && \
+    cat /home/spark/bin/start-spark-cluster.sh && \
+    ls -lat /home/spark && \
+    ls -lat /home/spark/bin && \
+    ls -lat /home/spark/logs && \
+    echo "`date` - Conteúdo de /spark/DATA em tempo de build" && \
+    ls -lat /spark/DATA
+
+ENTRYPOINT [ "/bin/start-master-or-worker.sh" ]
+# CMD ["/bin/bash"]

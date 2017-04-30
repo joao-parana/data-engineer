@@ -30,7 +30,19 @@ docker network create spark
 docker network ls
 ```
 
-### Iniciando os Conteineres dos Workers 3, 2 e 1 ...
+### Iniciando o Contêiner do Master 
+
+Abre-se uma janela de Terminal e executa-se:
+
+```bash
+docker run --rm --name spark-master -h spark-master \
+           --network=spark \
+           -p 19092:19092 \
+           -p 7077:7077 -p 8080:8080 \
+           -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
+```
+
+### Iniciando os Conteineres dos Workers 1, 2 e 3 ...
 
 **Para cada um dos Workers** abre-se uma janela de Terminal independente e executa-se em cada uma delas os comandos:
 
@@ -52,19 +64,6 @@ docker run --rm --name spark-worker3 -h spark-worker3 -p 8083:8081 \
            -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
 ```
 
-
-### Iniciando o Contêiner do Master 
-
-Abre-se uma janela de Terminal e executa-se:
-
-```bash
-docker run --rm --name spark-master -h spark-master \
-           --network=spark \
-           -p 9090:9090 \
-           -p 7077:7077 -p 8080:8080 \
-           -v $PWD/DATA:/spark/DATA -i -t parana/wff bash
-```
-
 ### Listando os Contêineres
 
 O comando abaixo mostra os contêineres carregados na memória.
@@ -80,6 +79,21 @@ O comando abaixo mostra todos os contêineres incluindo os que não estão em ex
 docker ps -a
 ```
 
+Uma shell foi criada para executar os comandos acima de forma simplicicada.
+A diferença é que os conteineres são invocados no modo Background. 
+Para executá-la use:
+
+```bash
+./start-all.sh
+```
+
+Como os conteineres estão executando em Background para interagis com eles
+temos de executar, por exemplo:
+
+```
+docker exec -i -t spark-master bash 
+```
+
 ### Inspecionando o volume /spark/DATA
 
 O volume `/spark/DATA` é compartilhado entre todos os conteineres (master e workers) 
@@ -93,7 +107,11 @@ docker run -v $PWD/DATA:/spark/DATA -w /spark/DATA busybox ls -la
 Neste exemplo listamos o conteúdo do volume `/spark/DATA` usando a imagem `busybox`
 que fornece comandos de bash numa imagem de apenas 1.11 MB.
 
+Outro exemplo:
 
+```bash
+docker run -v $PWD/DATA:/spark/DATA -w /spark/DATA busybox cat f_cmd.sh
+```
 
 ## Iniciando o Cluster
 
@@ -188,6 +206,9 @@ Programas GO quando compilados são convertidos para código binário e ficam
 muito eficientes. Além disso GO é uma linguagem de alto nível com suporte 
 nativo a multithreading e TCP/IP.
 
+O procedimento abaixo é feito durante o processo de build da Imagem Docker.
+Esta descrição é para o caso de se fazer no computador Host.
+
 Precisamos fazer o setup do `$GOPATH` para dentro do projeto.
 
 ```
@@ -242,6 +263,89 @@ func main() {
 }
 ```
 
+### Fonte do fwd_cmd.go
+
+O use de Bash para fazer Forward de Command para o wff-gateway não é apropriado
+por questões de eficiencia. Por este motivo foi criado um programa GO para isso.
+
+
+```go
+package main
+
+import (
+  "bufio"
+  "fmt"
+  "log"
+  "net"
+  "os"
+  "strings"
+)
+
+func main() {
+  host := "127.0.0.1"
+  port := "19092"
+  argsWithoutProg := os.Args[1:]
+  if len(argsWithoutProg) > 0 {
+    host = argsWithoutProg[0]
+  }
+  if len(argsWithoutProg) > 1 {
+    port = argsWithoutProg[1]
+  }
+  // connect to this socket
+  conn, err := net.Dial("tcp", host+":"+port)
+  if err != nil {
+    log.Fatal("net.Dial(\"tcp\", \""+host+":"+port+"\") executed. ERROR: ", err)
+  }
+  reader := bufio.NewReader(os.Stdin)
+  line, _ := reader.ReadString('\n')
+
+  fmt.Fprintf(os.Stdout, strings.ToUpper(line+"\n"))
+  scanner := bufio.NewScanner(os.Stdin)
+  for scanner.Scan() {
+    // send to socket
+    fmt.Fprintf(conn, line+"\n")
+    // listen for reply
+    message, _ := bufio.NewReader(conn).ReadString('\n')
+    fmt.Print("Message from server: " + message)
+    line = scanner.Text()
+  }
+}
+```
+
+
+Código Scala de exemplo para download de arquivos em paralelo no Spark.
+
+val data = List(
+  "curl -O http://your-server/vra/2016_01.csv",
+  "curl -O http://your-server/vra/2016_02.csv",
+  "curl -O http://your-server/vra/2016_03.csv",
+  "curl -O http://your-server/vra/2016_04.csv"
+)
+val dataRDD = sc.makeRDD(data)
+val pipeRDD = dataRDD.pipe("f_cmd.sh")
+val ret = pipeRDD.collect()
+ret.foreach(println)
+
+
+Shell `f_cmd.sh` invocada pelo Spark via método pipe()
+
+```
+#!/bin/sh
+while read LINE; do
+  echo ${LINE}
+  echo ${LINE} | curl telnet://127.0.0.1:19092
+done
+```
+
+Esta shell faz apenas o Forward do comando e pode ser substituida pelo
+programa `fwd_cmd` mostrado acima, bastando substituir a linha do `pipe`
+por
+
+```scala
+val pipeRDD = dataRDD.pipe("fwd_cmd")
+```
+
+
 ### Fonte do Servidor WEB
 
 Inicialmente obtemos as dependências do `gin` que é um framework WEB leve
@@ -261,8 +365,12 @@ go get gopkg.in/yaml.v2
 go get gopkg.in/gin-gonic/gin.v1
 ```
 
+O fonte de um exemplo está em [maven/src/main/go/cmd/web-server/web-server.go](maven/src/main/go/cmd/web-server/web-server.go)
+
+Para fazer build de todos os programas GO use:
+
 ```bash
-$GOPATH/bin/gb build main/go/cmd/to_upper
+cd maven/src
 $GOPATH/bin/gb build all
 ```
 
