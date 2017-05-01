@@ -7,4 +7,6 @@ shared/xyz.jar
 DATA/derby.log
 DATA/metastore_db/
 maven/teste-1.txt
+derby.log
+metastore_db/
 
