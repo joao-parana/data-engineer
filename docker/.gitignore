@@ -6,11 +6,5 @@ shared/xpto.jar
 shared/xyz.jar
 DATA/derby.log
 DATA/metastore_db/
-maven/bin/[a-z]*
-maven/pkg/
-maven/src/file
-maven/src/github.com/
-maven/src/golang.org/
-maven/src/gopkg.in/
 maven/teste-1.txt
 
