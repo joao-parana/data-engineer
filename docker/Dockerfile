@@ -229,6 +229,7 @@ RUN mkdir -p /home/spark/bin && mkdir -p /home/spark/logs && \
     chown -R spark:spark /home/spark
     
 ADD conf/start-spark-cluster.sh /home/spark/bin/start-spark-cluster.sh
+ADD conf/start-worker-number /home/spark/bin/start-worker-number
 
 # RUN showmount -e mulder 
 
