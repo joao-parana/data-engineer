@@ -243,5 +243,12 @@ RUN chown -R spark:spark /home/spark/bin && \
     echo "`date` - Conteúdo de /spark/DATA em tempo de build" && \
     ls -lat /spark/DATA
 
+# WEB UI para outros Slaves (limite de seis no total)
+EXPOSE 8082
+EXPOSE 8083
+EXPOSE 8084
+EXPOSE 8085
+EXPOSE 8086
+
 ENTRYPOINT [ "/bin/start-master-or-worker.sh" ]
 # CMD ["/bin/bash"]

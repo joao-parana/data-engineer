@@ -4,4 +4,4 @@ set -e
 # 
 echo "`date` - Ao invocar este script você deve passar um inteiro maior que 1 crescente"
 echo "`date` - ou seja, na primeira chamada passe 1, depois passe 2, 3 e assim por diante"
-nohup $JAVA_HOME/bin/java -cp /home/spark/spark/conf/:/home/spark/spark/jars/* -Xmx1g org.apache.spark.deploy.worker.Worker --webui-port 808$1 spark://aldebaran.eic.cefet-rj.br:7077  > worker_$1.log 2>&1 &
+nohup $JAVA_HOME/bin/java -cp /home/spark/spark/conf/:/home/spark/spark/jars/* -Xmx1g org.apache.spark.deploy.worker.Worker --webui-port 808$1 spark://spark-master:7077  > worker_$1.log 2>&1 &

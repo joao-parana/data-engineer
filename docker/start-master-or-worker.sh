@@ -23,8 +23,19 @@ fi
 if [[ $HOST_NAME == *"worker"* ]]; then
   echo "`date` - Este é um dos Workers"  >> /home/spark/logs/log.stdout
 fi
+
 service spark start
 service wffgateway start
+
+# compatibilizando com cluster real
+ln -s /usr/local/spark /home/spark/spark 
+# Se for Master e usuário desejar, poderá carregar vários workers no mesmo host.
+# Basta executar em sequencia:
+# /home/spark/bin/start-worker-number 1
+# /home/spark/bin/start-worker-number 2
+# /home/spark/bin/start-worker-number 3
+# e assim por diante
+
 # Copiando binários executáveis gerados à partir do $GOPATH/bin
 # A cópia não é necessária pois o executável está no $PATH
 cp $GOPATH/bin/fwd_cmd /spark/DATA
