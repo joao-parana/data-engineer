@@ -19,13 +19,15 @@ cd ..
 
 ### Configuração de DNS e Network
 
-No computador Host (macOS, por exemplo), faça:
+Agora, supondo que sua rede (subnet) seja 192.168.0.0 no computador Host (macOS, por exemplo), faça o seguinte:
 
 ```bash
 # limpando networks inúteis criadas anteriormente
 docker network prune -f
 # criando uma Network para o Spark usar entre os contêineres
-docker network create spark 
+# docker network create spark # Default para subrede é 172.18.0.0/16
+# crio outra rede compatível com minha subrede usando a mesma subnet
+docker network create --subnet=192.168.0.0/16 spark 
 # listando as Networks existentes
 docker network ls
 ```
@@ -35,11 +37,11 @@ docker network ls
 Abre-se uma janela de Terminal e executa-se:
 
 ```bash
-docker run --rm --name spark-master --net=host -h spark-master \
-           --network=spark \
+docker run --rm --name spark-master -h spark-master \
+           --network=spark --ip 192.168.0.170 \
            -p 19092:19092 \
            -p 7077:7077 -p 8080:8080 \
-           -v $PWD/DATA:/spark/DATA -d parana/wff bash
+           -v $PWD/DATA:/spark/DATA -d parana/wff
 ```
 
 Depois execute o comando abaixo para confirmar o endereço IP do Contêiner
@@ -54,21 +56,21 @@ docker exec -i -t  spark-master ip addr | grep inet
 **Para cada um dos Workers** abre-se uma janela de Terminal independente e executa-se em cada uma delas os comandos:
 
 ```bash
-docker run --rm --name spark-worker1 --net=host -h spark-worker1 -p 8081:8081 \
-           --network=spark \
-           -v $PWD/DATA:/spark/DATA -d parana/wff bash
+docker run --rm --name spark-worker1 -h spark-worker1 -p 8081:8081 \
+           --network=spark --ip 192.168.0.171 \
+           -v $PWD/DATA:/spark/DATA -d parana/wff
 ```
 
 ```bash
-docker run --rm --name spark-worker2 --net=host -h spark-worker2 -p 8082:8081 \
-           --network=spark \
-           -v $PWD/DATA:/spark/DATA -d parana/wff bash
+docker run --rm --name spark-worker2 -h spark-worker2 -p 8082:8081 \
+           --network=spark  --ip 192.168.0.172 \
+           -v $PWD/DATA:/spark/DATA -d parana/wff
 ```
 
 ```bash
-docker run --rm --name spark-worker3 --net=host -h spark-worker3 -p 8083:8081 \
-           --network=spark \
-           -v $PWD/DATA:/spark/DATA -d parana/wff bash
+docker run --rm --name spark-worker3 -h spark-worker3 -p 8083:8081 \
+           --network=spark  --ip 192.168.0.173 \
+           -v $PWD/DATA:/spark/DATA -d parana/wff
 ```
 
 ### Listando os Contêineres
