@@ -163,7 +163,6 @@ ping spark-worker3 -c 3
 Na janela de Terminal do Contêiner Master, executa-se:
 
 ```bash
-# Desabilitar a interface de rede 
 /usr/local/spark/sbin/start-master.sh
 ```
 
