@@ -513,3 +513,7 @@ cat /etc/hosts
 
 Agora edite as ultimas linhas do arquivo `/etc/hosts` adicionando referências para os outros contêineres. Pode-se usar o comando `vi` para isso.
 
+## Usando com Docker Swarm
+
+Neste link [https://docs.docker.com/engine/swarm/swarm-tutorial/](https://docs.docker.com/engine/swarm/swarm-tutorial/) é possível consultar como implementar o Swarm numa rede de exemplo. 
+
